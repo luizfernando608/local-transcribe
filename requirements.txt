@@ -1,0 +1,4 @@
+# Núcleo (transcrição). ffmpeg precisa estar no PATH.
+faster-whisper>=1.2,<2
+groq>=0.31,<1
+numpy>=1.26,<3

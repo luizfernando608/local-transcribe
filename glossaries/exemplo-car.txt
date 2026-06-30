@@ -1,0 +1,21 @@
+# Glossário de exemplo (domínio CAR / geoprocessamento).
+# Formato: padrao_regex => substituto   (case-insensitive; '#' = comentário)
+\bcarros\b => CARs
+\bcarro\b => CAR
+\bCK\s?2\.0\b => CAR 2.0
+\bg[eé]is\b => GEOs
+\bgel\b => GEO
+\bsiglos\s+2000\b => SIRGAS 2000
+\bSIGA\s+2000\b => SIRGAS 2000
+\bcirgas\b => SIRGAS
+\bShopify\b => shapefile
+\bchip\s?file\b => shapefile
+\bshape\s+file\b => shapefile
+\bConferro\b => CONFEA
+\bequitar\b => hectare
+\bARP\b => ART
+\bcloresta\b => floresta
+\bsenha\s+(do\s+|a\s+)?GOV\b => senha Gov.br
+\bLandSat\b => Landsat
+\bSentinels\b => Sentinel
+\bPouzil\b => pousio

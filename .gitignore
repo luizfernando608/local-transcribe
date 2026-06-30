@@ -1,0 +1,23 @@
+# Segredos — NUNCA versionar
+.env
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Saídas e mídia
+*_transcricao/
+temp/
+*.wav
+*.flac
+*.mp4
+*.m4a
+*.mp3
+
+# HF / modelos
+.cache/
