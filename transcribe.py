@@ -39,6 +39,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--prompt", help="termos/jargões para orientar a transcrição")
     ap.add_argument("--no-diarize", action="store_true", help="pula a diarização")
     ap.add_argument("--diarizer", choices=["auto", "pyannote", "resemblyzer"], default="auto")
+    ap.add_argument("--diar-model", default="pyannote/speaker-diarization-community-1",
+                    help="modelo pyannote (ex.: pyannote/speaker-diarization-3.1)")
     ap.add_argument("--speakers", type=int, help="nº exato de falantes (se souber)")
     ap.add_argument("--min-speakers", type=int)
     ap.add_argument("--max-speakers", type=int)
@@ -95,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
                 if not hf_token:
                     raise RuntimeError("HF_TOKEN ausente para pyannote.")
                 turns = diarize.diarize_pyannote(
-                    wav, hf_token, num_speakers=args.speakers,
+                    wav, hf_token, model=args.diar_model, num_speakers=args.speakers,
                     min_speakers=args.min_speakers, max_speakers=args.max_speakers, log=log,
                 )
             else:

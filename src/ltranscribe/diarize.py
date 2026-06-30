@@ -32,7 +32,7 @@ def diarize_pyannote(
     wav: str | Path,
     hf_token: str,
     *,
-    model: str = "pyannote/speaker-diarization-3.1",
+    model: str = "pyannote/speaker-diarization-community-1",
     num_speakers: int | None = None,
     min_speakers: int | None = None,
     max_speakers: int | None = None,
@@ -47,7 +47,10 @@ def diarize_pyannote(
     waveform = torch.from_numpy(data).unsqueeze(0)  # (1, T)
 
     log(f"  Carregando pipeline {model}...")
-    pipeline = Pipeline.from_pretrained(model, use_auth_token=hf_token)
+    try:  # pyannote.audio 4.x usa token=; 3.x usa use_auth_token=
+        pipeline = Pipeline.from_pretrained(model, token=hf_token)
+    except TypeError:
+        pipeline = Pipeline.from_pretrained(model, use_auth_token=hf_token)
     pipeline.to(torch.device("cpu"))
 
     kwargs: dict = {}
