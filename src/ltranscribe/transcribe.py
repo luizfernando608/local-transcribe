@@ -102,8 +102,10 @@ def transcribe_local(
 ) -> dict:
     from faster_whisper import WhisperModel
 
+    model_id = "mobiuslabsgmbh/faster-whisper-large-v3-turbo" if model_size in ("turbo", "large-v3-turbo") else model_size
     log(f"  Carregando faster-whisper {model_size} ({compute_type}, CPU)...")
-    model = WhisperModel(model_size, device="cpu", compute_type=compute_type, cpu_threads=cpu_threads)
+    model = WhisperModel(model_id, device="cpu", compute_type=compute_type, cpu_threads=cpu_threads)
+
     seg_iter, info = model.transcribe(
         str(wav),
         language=language,
