@@ -9,8 +9,7 @@ Pipeline:
 1. **Áudio** — extrai com `ffmpeg` para WAV 16 kHz mono.
 2. **Transcrição** — Groq Whisper `large-v3` se houver `GROQ_API_KEY`; senão
    `faster-whisper` local (CPU, int8). Sempre com timestamps por palavra.
-3. **Diarização** — `pyannote/speaker-diarization-3.1` se houver `HF_TOKEN`
-   (gold standard); senão fallback leve com **Resemblyzer** + clustering.
+3. **Diarização** — **ONNX Runtime (PyAnnote 3.0 ONNX)** por padrão (ultra-rápido: ~35s para 1h de áudio em CPU/GPU); com opções para `pyannote` (PyTorch) ou **Resemblyzer**.
 4. **Merge** — atribui cada palavra ao falante e agrupa em falas com timestamps.
 5. **Correção** — aplica um glossário de trocas de alta confiança (siglas/jargões).
 
@@ -30,16 +29,12 @@ reaproveite os `.env` de projetos conhecidos desta máquina
 | Variável        | Para quê                          | Sem ela                     |
 |-----------------|-----------------------------------|-----------------------------|
 | `GROQ_API_KEY`  | transcrição rápida (Groq)         | usa faster-whisper local    |
-| `HF_TOKEN`      | diarização pyannote (gold)        | usa fallback Resemblyzer    |
-
-> `pyannote/speaker-diarization-3.1` exige aceitar os termos dos modelos
-> `pyannote/speaker-diarization-3.1` e `pyannote/segmentation-3.0` no HuggingFace
-> com a conta dona do `HF_TOKEN`.
+| `HF_TOKEN`      | diarização pyannote (PyTorch)     | usa ONNX / Resemblyzer      |
 
 ## Uso
 
 ```bash
-# auto: usa Groq+pyannote se as chaves existirem, senão local
+# auto: usa Groq + ONNX (ultra-rápido, ~1 min no total para 1h de vídeo)
 python transcribe.py "reuniao.mp4"
 
 # 100% local, modelo grande, 2 falantes conhecidos
@@ -59,13 +54,14 @@ python transcribe.py "call.mp4" --prompt "SICAR, SIRGAS 2000, shapefile, QGIS"
 | `--provider` | `auto` | `auto` / `groq` / `local` |
 | `--language` | `pt` | ISO do idioma ou `auto` |
 | `--model` | `large-v3` | modelo faster-whisper local |
-| `--diarizer` | `auto` | `auto` / `pyannote` / `resemblyzer` |
+| `--diarizer` | `auto` | `auto` / `onnx` / `pyannote` / `resemblyzer` |
 | `--speakers N` | — | nº exato de falantes (se souber) |
 | `--min-speakers`/`--max-speakers` | — | faixa de falantes |
 | `--glossary FILE` | — | regras `regex => troca` |
 | `--no-diarize` | — | só transcreve |
 | `--cpu-threads` | `8` | threads no caminho local |
 | `--keep-wav` | — | mantém o WAV extraído |
+
 
 ## Saídas (em `<entrada>_transcricao/`)
 

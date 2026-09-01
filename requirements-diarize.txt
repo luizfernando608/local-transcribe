@@ -1,12 +1,18 @@
 # Diarização — instale conforme a estratégia desejada.
 
-# Opção A (gold standard): pyannote. Requer HF_TOKEN e aceitar os termos do
-# modelo no HuggingFace (community-1 para pyannote.audio 4.x, ou 3.1 para 3.x).
-pyannote.audio>=4.0
-torch>=2.2
-soundfile
+# Opção 1 (Padrão, Ultra-rápido, Cross-platform CPU/GPU): ONNX Runtime + PyAnnote 3.0 ONNX.
+# Sem necessidade de token HF, roda em ~35s para 1h de áudio em qualquer OS/CPU.
+onnxruntime>=1.18.0
+pyannote-onnx>=0.1.1
+modelscope>=1.15.0
 
-# Opção B (fallback leve, sem token): embeddings Resemblyzer + clustering.
-resemblyzer
-librosa
-scikit-learn
+# Opção 2 (PyTorch nativo): pyannote.audio (requer HF_TOKEN).
+# pyannote.audio>=4.0
+# torch>=2.2
+# soundfile
+
+# Opção 3 (Fallback leve, sem token): embeddings Resemblyzer + clustering.
+resemblyzer>=0.1.4
+librosa>=0.10.0
+scikit-learn>=1.4.0
+

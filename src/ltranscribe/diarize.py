@@ -74,6 +74,68 @@ def diarize_pyannote(
     return turns
 
 
+# --------------------------- ONNX (DirectML / CPU Ultra-Fast) --------------------------- #
+
+def diarize_onnx(
+    wav: str | Path,
+    *,
+    model_name: str = "segmentation-3.0",
+    num_speakers: int | None = None,
+    threshold: float = 0.5,
+    log: Callable[[str], None] = print,
+) -> list[dict]:
+    """Diarização ultra-rápida via ONNX Runtime com aceleração DirectML/CPU."""
+    from pyannote_onnx import PyannoteONNX
+
+    data, sr = _load_wav_mono(wav)
+    dur = len(data) / sr
+
+    log(f"  Inicializando modelo ONNX ({model_name})...")
+    pyannote = PyannoteONNX(model_name=model_name, show_progress=False)
+
+    log("  Inferência de segmentação ONNX...")
+    seg_list = list(pyannote(data))
+    seg_arr = np.array(seg_list)
+
+    total_frames = len(seg_arr)
+    if total_frames == 0:
+        return [{"start": 0.0, "end": dur, "speaker": "SPEAKER_00"}]
+
+    time_step = dur / total_frames
+    turns: list[dict] = []
+    current_speaker = None
+    turn_start = 0.0
+
+    for frame_idx, row in enumerate(seg_arr):
+        t = frame_idx * time_step
+        best_spk = int(np.argmax(row))
+        if num_speakers and best_spk >= num_speakers:
+            # limita aos top N se especificado
+            sorted_spks = np.argsort(row)[::-1]
+            valid = [s for s in sorted_spks if s < num_speakers]
+            best_spk = valid[0] if valid else 0
+
+        if row[best_spk] > threshold:
+            spk_label = f"SPEAKER_{best_spk:02d}"
+        else:
+            spk_label = None
+
+        if spk_label != current_speaker:
+            if current_speaker is not None:
+                turns.append({"start": turn_start, "end": t, "speaker": current_speaker})
+            current_speaker = spk_label
+            turn_start = t
+
+    if current_speaker is not None:
+        turns.append({"start": turn_start, "end": dur, "speaker": current_speaker})
+
+    if not turns:
+        turns = [{"start": 0.0, "end": dur, "speaker": "SPEAKER_00"}]
+
+    return turns
+
+
+
 # --------------------------- Resemblyzer (fallback) --------------------------- #
 
 def diarize_resemblyzer(

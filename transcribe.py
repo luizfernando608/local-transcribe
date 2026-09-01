@@ -38,7 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--groq-model", default="whisper-large-v3")
     ap.add_argument("--prompt", help="termos/jargões para orientar a transcrição")
     ap.add_argument("--no-diarize", action="store_true", help="pula a diarização")
-    ap.add_argument("--diarizer", choices=["auto", "pyannote", "resemblyzer"], default="auto")
+    ap.add_argument("--diarizer", choices=["auto", "onnx", "pyannote", "resemblyzer"], default="auto")
+
     ap.add_argument("--diar-model", default="pyannote/speaker-diarization-community-1",
                     help="modelo pyannote (ex.: pyannote/speaker-diarization-3.1)")
     ap.add_argument("--speakers", type=int, help="nº exato de falantes (se souber)")
@@ -89,11 +90,15 @@ def main(argv: list[str] | None = None) -> int:
     if not args.no_diarize:
         diarizer = args.diarizer
         if diarizer == "auto":
-            diarizer = "pyannote" if hf_token else "resemblyzer"
+            diarizer = "onnx"
         log(f"Diarização via {diarizer}...")
         t1 = time.time()
         try:
-            if diarizer == "pyannote":
+            if diarizer == "onnx":
+                turns = diarize.diarize_onnx(
+                    wav, num_speakers=args.speakers, log=log,
+                )
+            elif diarizer == "pyannote":
                 if not hf_token:
                     raise RuntimeError("HF_TOKEN ausente para pyannote.")
                 turns = diarize.diarize_pyannote(
@@ -107,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             n_spk = len({t["speaker"] for t in turns})
             log(f"Diarização: {len(turns)} turnos, {n_spk} falantes em {time.time() - t1:.0f}s")
+
             diarized_lines = merge.merge(transcript, turns)
             output.write_diarized(diarized_lines, out_dir / f"{src.stem}_falantes.txt")
             output.write_diarized_json(diarized_lines, out_dir / f"{src.stem}_falantes.json")
