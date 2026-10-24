@@ -2,3 +2,5 @@
 faster-whisper>=1.2,<2
 groq>=0.31,<1
 numpy>=1.26,<3
+# Lê a chave do Groq que o PACE guarda no Gerenciador de Credenciais do Windows.
+keyring>=24

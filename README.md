@@ -23,8 +23,17 @@ Pipeline:
 ## Chaves (opcionais, nunca versionadas)
 
 Defina por ambiente, por `.env` na pasta atual, ou deixe que o programa
-reaproveite os `.env` de projetos conhecidos desta máquina
-(ver `DEFAULT_ENV_SEARCH` em `src/ltranscribe/config.py`):
+reaproveite as chaves já existentes nesta máquina
+(ver `DEFAULT_ENV_SEARCH` e `PACE_KEYRING` em `src/ltranscribe/config.py`):
+
+- `GROQ_API_KEY` vem do **PACE** (whisper-dictation-tray): primeiro do cofre dele
+  no Gerenciador de Credenciais do Windows — onde a janela de Configurações do
+  PACE grava a chave — e, se não houver, do `.env` antigo do PACE. Trocou a chave
+  no PACE, o local-transcribe já usa a nova.
+- `HF_TOKEN` vem do `.env` do projeto "Trabalho com CAR".
+
+Ordem de prioridade: variável de ambiente → `.env` da pasta atual → cofre do
+PACE → demais `.env` conhecidos.
 
 | Variável        | Para quê                          | Sem ela                     |
 |-----------------|-----------------------------------|-----------------------------|
